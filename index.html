@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Snake Minigame</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      #main {
+        width: 360px;
+        height: 420px;
+        border: 10px solid #000;
+        border-radius: 20px;
+        background-color: #b7d4a8;
+        margin: 50px auto;
+      }
+
+      #stage {
+        width: 304px;
+        height: 304px;
+        border: 2px solid #000;
+        margin: 20px auto;
+        position: relative;
+      }
+
+      #snake > div {
+        width: 10px;
+        height: 10px;
+        background-color: #000;
+        position: absolute;      
+      }
+
+      #food {
+        width: 10px;
+        height: 10px;
+        position: absolute;
+        top: 100px;
+        left: 120px;
+        display: flex;
+        flex-flow: wrap;
+      }
+
+      #food > div {
+        width: 5px;
+        height: 5px;
+        background-color: #000;
+        transform: rotate(45deg);
+      }
+
+      #info {
+        width: 304px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: space-between;
+        font: bold 20px Courier;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="main">
+      <div id="stage">
+        <div id="snake">
+          <div></div>
+        </div>
+        <div id="food">
+          <div></div>
+          <div></div>
+          <div></div>
+          <div></div>
+        </div>
+      </div>
+      <div id="info">
+        <div>SCORE: <span id="score">100</span></div>
+        <div>Level: <span id="level">1</span></div>
+      </div>
+    </div>
+    <script>
+      // get snake container
+      const snake = document.getElementById("snake");
+      // get snake parts
+      const snakes = snake.getElementsByTagName("div");
+      // get food
+      const food = document.getElementById("food");
+
+      function changeFoodLocation() {
+        const x = Math.floor(Math.random() * 30) * 10;
+        const y = Math.floor(Math.random() * 30) * 10;
+        food.style.top = y + "px";
+        food.style.left = x + "px";
+      }
+
+      changeFoodLocation();
+
+      let dir;
+      const keyArr = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"];
+      document.addEventListener("keydown", (event) => {
+        if (keyArr.includes(event.key)) {
+          dir = event.key;
+        }
+      });
+
+      setTimeout(function move() {
+        // get snake head
+        const head = snakes[0];
+        // get snake head position
+        let x = head.offsetLeft;
+        let y = head.offsetTop;
+
+        switch (dir) {
+          case "ArrowUp":
+            y -= 10;
+            break;
+          case "ArrowDown":
+            y += 10;
+            break;
+          case "ArrowLeft":
+            x -= 10;
+            break;
+          case "ArrowRight":
+            x += 10;
+            break;
+        }
+
+        if (
+          head.offsetTop === food.offsetTop &&
+          head.offsetLeft === food.offsetLeft
+        ) {
+          // change food location
+          changeFoodLocation();
+          // add snake length
+          snake.insertAdjacentHTML("beforeend", "<div/>");
+        }
+        // get tail
+        const tail = snakes[snakes.length - 1];
+        // change snake position
+        tail.style.left = x + "px";
+        tail.style.top = y + "px";
+        // move tail to head
+        snake.insertAdjacentElement("afterbegin", tail);
+        setTimeout(move, 300);
+      }, 300);
+    </script>
+  </body>
+</html>
