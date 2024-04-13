@@ -32,7 +32,8 @@
         width: 10px;
         height: 10px;
         background-color: #000;
-        position: absolute;      
+        position: absolute;
+        border: 1px solid #b7d4a8;
       }
 
       #food {
@@ -75,8 +76,8 @@
         </div>
       </div>
       <div id="info">
-        <div>SCORE: <span id="score">100</span></div>
-        <div>Level: <span id="level">1</span></div>
+        <div>SCORE: <span id="score">0</span></div>
+        <div>LEVEL: <span id="level">1</span></div>
       </div>
     </div>
     <script>
@@ -86,6 +87,12 @@
       const snakes = snake.getElementsByTagName("div");
       // get food
       const food = document.getElementById("food");
+      // get score span and level span
+      const scoreSpan = document.getElementById("score");
+      const levelSpan = document.getElementById("level");
+
+      let score = 0;
+      let level = 0;
 
       function changeFoodLocation() {
         const x = Math.floor(Math.random() * 30) * 10;
@@ -94,17 +101,34 @@
         food.style.left = x + "px";
       }
 
-      changeFoodLocation();
-
       let dir;
+      // variable to record key status
+      let keyActive = true;
+
       const keyArr = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"];
+
+      // map opposite direction
+      const dirObject = {
+        ArrowUp: "ArrowDown",
+        ArrowDown: "ArrowUp",
+        ArrowLeft: "ArrowRight",
+        ArrowRight: "ArrowLeft",
+      };
+
       document.addEventListener("keydown", (event) => {
-        if (keyArr.includes(event.key)) {
-          dir = event.key;
+        if (keyActive && keyArr.includes(event.key)) {
+          // check if snake can turn into opposite direction
+          if (snake.length < 2 || dirObject[dir] !== event.key) {
+            dir = event.key;
+            keyActive = false;
+          }
         }
       });
 
+      let gameOver = false;
+
       setTimeout(function move() {
+        keyActive = true;
         // get snake head
         const head = snakes[0];
         // get snake head position
@@ -134,7 +158,34 @@
           changeFoodLocation();
           // add snake length
           snake.insertAdjacentHTML("beforeend", "<div/>");
+          score++;
+          scoreSpan.textContent = score;
+          // increase level every 3 scores
+          if (score % 3 === 0 && level < 9) {
+            level++;
+            levelSpan.textContent = level + 1;
+          }
         }
+
+        /* check if game is over
+        1. hit the wall
+        2. self collision
+        */
+
+        // check if hitting the wall (0,0) is at top left corner
+        if (x < 0 || x > 290 || y < 0 || y > 290) {
+          alert("Snake hit the wall, game is over!");
+          return;
+        }
+        // check self collision and when there is only one head, condition evaluates to false
+        // there is no need to check tail since when the move happens, tail will be moved to new position
+        for (let i = 0; i < snakes.length - 1; i++) {
+          if (snakes[i].offsetLeft === x && snakes[i].offsetTop === y) {
+            alert("Snake hit itself, game is over!");
+            return;
+          }
+        }
+
         // get tail
         const tail = snakes[snakes.length - 1];
         // change snake position
@@ -142,7 +193,7 @@
         tail.style.top = y + "px";
         // move tail to head
         snake.insertAdjacentElement("afterbegin", tail);
-        setTimeout(move, 300);
+        setTimeout(move, 300 - level * 20);
       }, 300);
     </script>
   </body>
